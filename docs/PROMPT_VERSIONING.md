@@ -30,6 +30,16 @@ Nếu Langfuse không khả dụng, app dùng template local và trace metadata 
 5. Chuyển label `production` sang version 2, chạy lại một request.
 6. Rollback `production` về version 1 và lưu ảnh evidence.
 
+Có thể tự động tạo hai version, phát sinh hai trace cùng input, chuyển
+`production` sang candidate rồi rollback về baseline bằng:
+
+```bash
+python scripts/setup_prompt_versions.py
+```
+
+Script in version/trace ID và xác nhận `rollback_status=PASSED`; production
+được để lại ở baseline sau khi demo kết thúc.
+
 Không chấm prompt nào “hay hơn”. Điểm nằm ở khả năng truy xuất version, đổi label và rollback có bằng chứng.
 
 ## Evidence
