@@ -1,16 +1,30 @@
 service: day13-observability-lab
 window: 28d
+semantics:
+  objective: Technical threshold that defines whether an SLI measurement is good.
+  target: Percentage of requests or measurement windows that must meet the objective during the 28-day SLO window.
 slis:
   latency_p95_ms:
     objective: 3000
     target: 99.5
-    note: Replace with your group's target
+    unit: ms
+    comparison: lte
+    note: Baseline P95 is 1463 ms; 3000 ms leaves normal-operation headroom while detecting the released slow-retrieval incident.
   error_rate_pct:
     objective: 2
     target: 99.0
+    unit: percent
+    comparison: lte
+    note: Baseline error rate is 0%; the 2% limit matches the dashboard contract and protects users from sustained request failures.
   daily_cost_usd:
     objective: 2.5
     target: 100.0
+    unit: usd_per_rolling_24h
+    comparison: lte
+    note: The sample workload costs about 0.023 USD; a 2.50 USD rolling-24-hour budget provides lab headroom while exposing abnormal token or traffic growth.
   quality_score_avg:
     objective: 0.75
     target: 95.0
+    unit: score_0_to_1
+    comparison: gte
+    note: Baseline average quality is about 0.88; 0.75 is the dashboard quality floor and catches meaningful answer degradation without reacting to one noisy sample.

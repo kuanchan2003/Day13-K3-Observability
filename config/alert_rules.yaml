@@ -1,19 +1,24 @@
 alerts:
   - name: HighLatencyP95
     severity: warning
-    condition: latency_p95_ms > 3000 for 5m
+    condition: latency_p95_ms > 3000
+    for: 5m
     type: symptom-based
-    owner: ai-platform-oncall
-    runbook: docs/alerts.md#alert-1
-  - name: ElevatedErrorRate
+    owner: sre-oncall
+    runbook: docs/alerts.md#highlatencyp95
+
+  - name: HighErrorRate
     severity: critical
-    condition: error_rate_pct > 2 for 5m and request_count >= 20
+    condition: error_rate_pct > 2
+    for: 5m
     type: symptom-based
-    owner: ai-platform-oncall
-    runbook: docs/alerts.md#alert-2
-  - name: QualityRegression
+    owner: sre-oncall
+    runbook: docs/alerts.md#higherrorrate
+
+  - name: DailyCostBudgetRisk
     severity: warning
-    condition: quality_score_avg < 0.75 for 15m and request_count >= 20
+    condition: daily_cost_usd > 2.5
+    for: 15m
     type: symptom-based
-    owner: ai-quality-oncall
-    runbook: docs/alerts.md#alert-3
+    owner: sre-oncall
+    runbook: docs/alerts.md#dailycostbudgetrisk
