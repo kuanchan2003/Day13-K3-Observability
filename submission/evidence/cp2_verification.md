@@ -60,9 +60,10 @@ cả trace đều có các trường `prompt_name`, `prompt_label`, `prompt_vers
 | `0125de649d46819efc514c9bd6a27ec3` | baseline | 1 | `req-600a49e5` |
 | `ad69fa868f854c733e0386392737735a` | candidate | 2 | `req-23aea27d` |
 
-## Ảnh chụp cần bổ sung thủ công
+## Evidence giao diện
 
-Bằng chứng API ở trên đã đầy đủ, tuy nhiên rubric còn yêu cầu ảnh chụp giao diện
-Langfuse. Hãy đăng nhập Langfuse Cloud, mở một trace baseline và một trace
-candidate trong bảng, sau đó chụp trang phiên bản prompt thể hiện `production`
-đang trỏ tới v1. Không để thông tin đăng nhập hoặc API key xuất hiện trong ảnh.
+- [traces.png](traces.png): giao diện Langfuse trace và prompt `day13-chat` v1.
+- [cp2_dashboard_runtime.png](cp2_dashboard_runtime.png): dashboard runtime đủ 6 panel.
+
+Bảng trace và kết quả API ở trên là evidence kiểm chứng hai phiên bản v1/v2,
+promotion `production=v2` và rollback về `production=v1`.
