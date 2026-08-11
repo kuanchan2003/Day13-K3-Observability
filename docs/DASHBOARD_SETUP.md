@@ -31,6 +31,11 @@ python scripts/validate_dashboard.py
 
 Validator kiểm tra cấu trúc contract; nó không thể chứng minh biểu đồ trong ảnh dùng đúng dữ liệu. Evidence runtime vẫn bắt buộc.
 
+Repo có sẵn dashboard runtime không cần dependency UI riêng tại
+`http://localhost:8000/dashboard`. Trang lấy snapshot từ `/metrics`, hiển thị
+đúng sáu nhóm, time range 60 phút, refresh 30 giây, đơn vị và threshold. Sau
+khi chạy load test, mở URL này để kiểm tra và chụp evidence.
+
 ## Cách kiểm tra runtime
 
 1. Lưu ảnh baseline và giá trị P95/error/cost hiện tại.
