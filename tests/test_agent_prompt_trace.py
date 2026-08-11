@@ -37,6 +37,11 @@ def test_agent_links_prompt_version_to_trace_and_generation(monkeypatch) -> None
     monkeypatch.setenv("LANGFUSE_PROMPT_LABEL", "production")
     client = RecordingLangfuseClient()
     monkeypatch.setattr(agent_module, "get_langfuse_client", lambda: client)
+    monkeypatch.setattr(
+        agent_module,
+        "get_contextvars",
+        lambda: {"correlation_id": "req-test1234"},
+    )
 
     agent = agent_module.LabAgent()
     agent_module.LabAgent.run.__wrapped__(
@@ -50,6 +55,7 @@ def test_agent_links_prompt_version_to_trace_and_generation(monkeypatch) -> None
     trace_metadata = client.trace_updates[-1]["metadata"]
     generation_update = client.generation_updates[-1]
     assert trace_metadata == {
+        "correlation_id": "req-test1234",
         "prompt_name": "day13-chat",
         "prompt_label": "production",
         "prompt_version": "3",
