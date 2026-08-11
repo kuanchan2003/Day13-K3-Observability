@@ -1,7 +1,9 @@
 # PII Redaction Evidence — Member B (Security Engineer)
 
 Scope: `app/pii.py` (regex patterns) + `app/logging_config.py` (`scrub_event` processor
-wired into the structlog pipeline). Generated on 2026-08-11 against `data/logs.jsonl`.
+wired into the structlog pipeline). First generated 2026-08-11 on the PII-only branch;
+updated 2026-08-11 after merging `origin/dev` (Member A's `CorrelationID` commit
+`f043f4f`, branch `Manh`) into `Van`, to show the combined result of both roles.
 
 ## 1. Test inputs sent to `/chat` (raw, contain real-looking PII)
 
@@ -14,43 +16,45 @@ wired into the structlog pipeline). Generated on 2026-08-11 against `data/logs.j
 | 5 | passport_vn | `Ho chieu cua toi la B1234567, can ho tro` |
 | 6 | address_vn | `Giao hang toi so nha 12 Nguyen Trai giup minh` |
 
-## 2. Resulting log lines in `data/logs.jsonl` (after redaction)
+## 2. Resulting log lines in `data/logs.jsonl` (after merge — redaction + correlation ID + enrichment together)
 
 ```json
-{"service": "api", "payload": {"message_preview": "What is your refund policy? My email is [REDACTED_EMAIL]"}, "event": "request_received", "level": "info", "ts": "2026-08-11T03:09:12.567789Z"}
-{"service": "api", "payload": {"message_preview": "Here is my phone [REDACTED_PHONE_VN], what should be logged?"}, "event": "request_received", "level": "info", "ts": "2026-08-11T03:09:17.458205Z"}
-{"service": "api", "payload": {"message_preview": "What is the policy for PII and credit card [REDACTED_CREDIT_CARD]?"}, "event": "request_received", "level": "info", "ts": "2026-08-11T03:09:21.916211Z"}
-{"service": "api", "payload": {"message_preview": "CCCD cua toi la [REDACTED_CCCD], xin dung luu lai"}, "event": "request_received", "level": "info", "ts": "2026-08-11T03:09:24.302657Z"}
-{"service": "api", "payload": {"message_preview": "Ho chieu cua toi la [REDACTED_PASSPORT_VN], can ho tro"}, "event": "request_received", "level": "info", "ts": "2026-08-11T03:09:25.440676Z"}
-{"service": "api", "payload": {"message_preview": "Giao hang toi [REDACTED_ADDRESS_VN]"}, "event": "request_received", "level": "info", "ts": "2026-08-11T03:09:26.640601Z"}
+{"service": "api", "payload": {"message_preview": "What is your refund policy? My email is [REDACTED_EMAIL]"}, "event": "request_received", "model": "claude-sonnet-4-5", "feature": "qa", "correlation_id": "req-c0634a79", "user_id_hash": "2055254ee30a", "session_id": "s01", "env": "dev", "level": "info", "ts": "2026-08-11T03:23:03.940251Z"}
+{"service": "api", "payload": {"message_preview": "Here is my phone [REDACTED_PHONE_VN], what should be logged?"}, "event": "request_received", "model": "claude-sonnet-4-5", "feature": "qa", "correlation_id": "req-f996668e", "user_id_hash": "64f6ec689229", "session_id": "s05", "env": "dev", "level": "info", "ts": "2026-08-11T03:23:09.062045Z"}
+{"service": "api", "payload": {"message_preview": "What is the policy for PII and credit card [REDACTED_CREDIT_CARD]?"}, "event": "request_received", "model": "claude-sonnet-4-5", "feature": "qa", "correlation_id": "req-8c711566", "user_id_hash": "4d14d5d4f719", "session_id": "s09", "env": "dev", "level": "info", "ts": "2026-08-11T03:23:13.559611Z"}
+{"service": "api", "payload": {"message_preview": "CCCD cua toi la [REDACTED_CCCD], xin dung luu lai"}, "event": "request_received", "model": "claude-sonnet-4-5", "feature": "qa", "correlation_id": "req-6fe4c48f", "user_id_hash": "92ec86fa8892", "session_id": "s11", "env": "dev", "level": "info", "ts": "2026-08-11T03:23:16.019263Z"}
+{"service": "api", "payload": {"message_preview": "Ho chieu cua toi la [REDACTED_PASSPORT_VN], can ho tro"}, "event": "request_received", "model": "claude-sonnet-4-5", "feature": "qa", "correlation_id": "req-3b61bf05", "user_id_hash": "a50656c6edf2", "session_id": "s12", "env": "dev", "level": "info", "ts": "2026-08-11T03:23:17.254519Z"}
+{"service": "api", "payload": {"message_preview": "Giao hang toi [REDACTED_ADDRESS_VN]"}, "event": "request_received", "model": "claude-sonnet-4-5", "feature": "qa", "correlation_id": "req-8010e845", "user_id_hash": "9607720f9f1c", "session_id": "s13", "env": "dev", "level": "info", "ts": "2026-08-11T03:23:18.488211Z"}
 ```
 
 No raw email address, phone number, card number, CCCD number, passport number, or house
-number from the inputs above appears anywhere in `data/logs.jsonl`.
+number from the inputs above appears anywhere in `data/logs.jsonl`. `user_id_hash` is a
+SHA-256-derived hash (`hash_user_id`), never the raw `user_id` — scrubbing and the
+correlation-ID/enrichment work (Member A) do not interfere with each other.
 
-## 3. `python scripts/validate_logs.py` output
+## 3. `python scripts/validate_logs.py` output (after merging Member A's `CorrelationID` commit)
 
 ```text
 --- Lab Verification Results ---
-Total log records analyzed: 26
-Records with missing required fields: 26
-Records with missing enrichment (context): 26
-Unique correlation IDs found: 0
+Total log records analyzed: 27
+Records with missing required fields: 0
+Records with missing enrichment (context): 0
+Unique correlation IDs found: 13
 Potential PII leaks detected: 0
 
 --- Grading Scorecard (Estimates) ---
-- [FAILED] Missing required fields (ts, level, etc.)
-- [FAILED] Correlation ID propagation (less than 2 unique IDs)
-- [FAILED] Log enrichment (missing user_id_hash, etc.)
++ [PASSED] Basic JSON schema
++ [PASSED] Correlation ID propagation
++ [PASSED] Log enrichment
 + [PASSED] PII scrubbing
 
-Estimated Score: 30/100
+Estimated Score: 100/100
 ```
 
-`+ [PASSED] PII scrubbing` and `Potential PII leaks detected: 0` are the evidence for this
-role. The other three FAILED lines (correlation ID, enrichment, required fields) are
-Member A's scope (`app/middleware.py`, request context binding) — not part of CP1 PII
-scrubbing.
+Before the merge (PII scrubbing alone, on top of the un-merged `middleware.py` TODOs),
+the same test run scored 30/100 with only `+ [PASSED] PII scrubbing` passing — see git
+history of this file. `Potential PII leaks detected: 0` held in both runs, confirming the
+scrubbing logic itself does not depend on correlation ID/enrichment being present.
 
 ## 4. What was implemented (commit `9554a15`, "Member B done CP1")
 

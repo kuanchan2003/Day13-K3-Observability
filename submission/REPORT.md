@@ -9,14 +9,14 @@
 
 ## 2. Kết quả kỹ thuật
 
-- Điểm `validate_logs.py`: 30/100 (xem [pii_redaction_evidence.md](evidence/pii_redaction_evidence.md) mục 3 — riêng PII scrubbing đã PASSED; 3 mục còn lại thuộc phần việc của Thành viên A/C)
+- Điểm `validate_logs.py`: 100/100 sau khi merge `origin/dev` (correlation ID + enrichment của Thành viên A, commit `f043f4f`) vào nhánh `Van` — xem [pii_redaction_evidence.md](evidence/pii_redaction_evidence.md) mục 3 (trước merge: 30/100, chỉ PII scrubbing PASSED).
 - Tổng số traces:
 - Số PII leak còn lại: 0 (`Potential PII leaks detected: 0`, xác nhận qua 6 loại PII: email, phone_vn, cccd, credit_card, passport_vn, address_vn)
 - Link/đường dẫn dashboard:
 
 ## 3. Logging và tracing
 
-- Evidence correlation ID:
+- Evidence correlation ID: [pii_redaction_evidence.md](evidence/pii_redaction_evidence.md) mục 2 (log có `correlation_id` dạng `req-xxxxxxxx`, không còn `MISSING`) — triển khai bởi Thành viên A (`app/middleware.py`, commit `f043f4f`); Thành viên B xác nhận không xung đột với PII scrubbing.
 - Evidence PII redaction: [submission/evidence/pii_redaction_evidence.md](evidence/pii_redaction_evidence.md) — 6 loại PII (email, phone_vn, cccd, credit_card, passport_vn, address_vn) test qua `/chat`, đối chiếu raw input vs log đã redact trong `data/logs.jsonl`, cộng kết quả `validate_logs.py` (`+ [PASSED] PII scrubbing`, `Potential PII leaks detected: 0`).
 - Evidence trace waterfall:
 - Giải thích một span đáng chú ý:
