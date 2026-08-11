@@ -3,10 +3,10 @@
 ## 1. Thông tin nhóm
 
 - Tên nhóm: B6
-- Repository URL: https://github.com/kuanchan2003/Day13-K3-Observability
-- Commit SHA cuối: `01a5902d09701f4f5fe57df9ef62bbb548eb2eea` (HEAD trước commit hoàn thiện báo cáo; cập nhật lại sau commit nộp bài nếu có).
+- Repository URL: https://github.com/kuanchan2003/K3-DAY13-2A202601997
+- Commit SHA cuối: `7a5682ea31290732859444b255200d9b7f9641bb` 
 - Thành viên và vai trò:
-  - Nguyễn Trần Nguyên Mạnh — `2A2026` — Thành viên A, API & Middleware.
+  - Nguyễn Trần Quang Mạnh — `2A202601035` — Thành viên A, API & Middleware.
   - Lê Hà Hải Vân — `2A202601587` — Thành viên B, Security Engineer.
   - Tạ Minh Đức — `2A202601497` — Thành viên C, Metrics & Dashboard.
   - Phạm Thành Long — `2A202601259` — Thành viên D, SRE & Alerts Engineer.
