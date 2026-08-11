@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
@@ -18,9 +19,22 @@ from .tracing import tracing_enabled
 
 configure_logging()
 log = get_logger()
-app = FastAPI(title="Day 13 Observability Lab")
-app.add_middleware(CorrelationIdMiddleware)
 agent = LabAgent()
+
+
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    log.info(
+        "app_started",
+        service=os.getenv("APP_NAME", "day13-observability-lab"),
+        env=os.getenv("APP_ENV", "dev"),
+        payload={"tracing_enabled": tracing_enabled()},
+    )
+    yield
+
+
+app = FastAPI(title="Day 13 Observability Lab", lifespan=lifespan)
+app.add_middleware(CorrelationIdMiddleware)
 
 
 @app.exception_handler(Exception)
@@ -39,16 +53,6 @@ async def handle_unexpected_exception(request: Request, exc: Exception) -> JSONR
         status_code=500,
         content={"detail": "Internal Server Error"},
         headers={"x-request-id": correlation_id} if correlation_id else None,
-    )
-
-
-@app.on_event("startup")
-async def startup() -> None:
-    log.info(
-        "app_started",
-        service=os.getenv("APP_NAME", "day13-observability-lab"),
-        env=os.getenv("APP_ENV", "dev"),
-        payload={"tracing_enabled": tracing_enabled()},
     )
 
 
