@@ -6,7 +6,6 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
 from structlog.contextvars import bind_contextvars
-from contextlib import asynccontextmanager
 
 from .agent import LabAgent
 from .incidents import disable, enable, status
@@ -48,6 +47,10 @@ async def handle_unexpected_exception(request: Request, exc: Exception) -> JSONR
         service="api",
         error_type=error_type,
         correlation_id=correlation_id,
+        user_id_hash=getattr(request.state, "user_id_hash", None),
+        session_id=getattr(request.state, "session_id", None),
+        feature=getattr(request.state, "feature", None),
+        model=getattr(request.state, "model", None),
     )
     return JSONResponse(
         status_code=500,
@@ -68,14 +71,24 @@ async def metrics() -> dict:
 
 @app.post("/chat", response_model=ChatResponse)
 async def chat(request: Request, body: ChatRequest) -> ChatResponse:
+    user_id_hash = hash_user_id(body.user_id)
+    # Also stashed on request.state (not just contextvars): BaseHTTPMiddleware runs this
+    # handler in a separate task, so if agent.run() raises, the Exception handler wired
+    # into ServerErrorMiddleware (outside that task) can't see contextvars bound here —
+    # request.state is a plain object reference and survives the task boundary.
+    request.state.user_id_hash = user_id_hash
+    request.state.session_id = body.session_id
+    request.state.feature = body.feature
+    request.state.model = agent.model
+
     bind_contextvars(
-        user_id_hash=hash_user_id(body.user_id),
+        user_id_hash=user_id_hash,
         session_id=body.session_id,
         feature=body.feature,
         model=agent.model,
         env=os.getenv("APP_ENV", "dev"),
     )
-    
+
     log.info(
         "request_received",
         service="api",
